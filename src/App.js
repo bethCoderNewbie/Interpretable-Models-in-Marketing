@@ -1,32 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Tabs, Tab, Slider, Select, MenuItem, FormControlLabel, Checkbox, Button, Paper, Typography, Grid, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import GaugeChart from 'react-gauge-chart';
-import './App.css';
+import { cn } from './lib/utils'; // Assuming you have this utility for clsx/tailwind-merge
 
-function App() {
-  const [tabIndex, setTabIndex] = useState(0);
+function InterpretableModelsSlide() {
   const [age, setAge] = useState(30);
   const [income, setIncome] = useState(60);
   const [distance, setDistance] = useState(5.0);
   const [timeOfDay, setTimeOfDay] = useState('Afternoon');
   const [weekend, setWeekend] = useState(true);
-  const [children, setChildren] = useState(false);
+  const [hasChildren, setHasChildren] = useState(false);
   const [previousVisits, setPreviousVisits] = useState(2);
   const [showResults, setShowResults] = useState(false);
   const [activeNode, setActiveNode] = useState(null);
   const [pollAnswer, setPollAnswer] = useState(null);
   
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-  
-  const handleTabChange = (event, newValue) => {
-    setTabIndex(newValue);
-  };
-
-  const handleGenerateStrategy = () => {
-    setShowResults(true);
-  };
-
   // Rules for the interactive tree nodes
   const nodes = [
     { id: 1, rule: "IF (time = lunchtime) AND (location = near restaurant) THEN coupon acceptance = 73%" },
@@ -56,7 +44,7 @@ function App() {
       probability = 0.85;
       discount = "20% off electronics";
       explanation = "Young professionals who shop in the evening with disposable income are highly responsive to technology discounts.";
-    } else if (distance < 5 && children) {
+    } else if (distance < 5 && hasChildren) {
       rule = "Nearby shoppers with children";
       probability = 0.72;
       discount = "Buy-one-get-one kids items";
@@ -81,413 +69,410 @@ function App() {
     return { rule, probability, discount, explanation };
   };
 
+  const handleGenerateStrategy = () => {
+    setShowResults(true);
+  };
+
   const { rule, probability, discount, explanation } = getMarketingOutcome();
 
-  // Sample interpretable model code snippet
-  const interpretableCode = `
-  # Interpretable Rule-Based Model (Bayesian Rule List)
-  
-  IF age < 25 AND time = evening AND income > 50k THEN
-      coupon_acceptance = 85%
-  ELSE IF distance < 5 miles AND has_children = yes THEN
-      coupon_acceptance = 72% 
-  ELSE IF previous_visits > 3 AND weekend = yes THEN
-      coupon_acceptance = 65%
-  ELSE IF income > 100k THEN
-      coupon_acceptance = 45%
-  ELSE
-      coupon_acceptance = 25%
-  
-  # Clear decision logic that marketers can understand!
-  `;
+  // UI Helper for slider inputs
+  const Slider = ({ label, value, onChange, min, max, step = 1 }) => (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <input 
+        type="range" 
+        min={min} 
+        max={max} 
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+      />
+      <div className="flex justify-between text-xs text-gray-500">
+        <span>{min}</span>
+        <span>{value}</span>
+        <span>{max}</span>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="App">
-      <Box sx={{ p: 4, maxWidth: '1200px', margin: '0 auto' }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ fontWeight: 'bold', color: '#2c3e50' }}>
-          Seeing Through the Black Box: Why Interpretable Models Matter in Marketing
-        </Typography>
-        <Typography variant="h5" component="h2" gutterBottom align="center" sx={{ color: '#34495e', mb: 4 }}>
-          Balancing accuracy with understanding for effective decision-making
-        </Typography>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white">
+      <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
+        Seeing Through the Black Box: Why Interpretable Models Matter in Marketing
+      </h1>
+      <p className="text-lg text-center text-gray-600 mb-8">
+        Balancing accuracy with understanding for effective decision-making
+      </p>
 
-        <Paper elevation={3} sx={{ p: 2, mb: 4 }}>
-          <Tabs value={tabIndex} onChange={handleTabChange} centered variant="fullWidth">
-            <Tab label="Model Comparison" />
-            <Tab label="Interactive Rules" />
-            <Tab label="Decision Simulator" />
-            <Tab label="Marketing Impact" />
-          </Tabs>
-          
-          {/* Tab 1: Model Comparison */}
-          {tabIndex === 0 && (
-            <Box sx={{ p: 3 }}>
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={5}>
-                  <Typography variant="h6" gutterBottom>The Interpretability Advantage</Typography>
-                  <Paper elevation={2} sx={{ p: 3, bgcolor: '#f8f9fa' }}>
-                    <Typography variant="body1" paragraph>✓ Transparency reveals the 'why' behind predictions</Typography>
-                    <Typography variant="body1" paragraph>✓ Builds trust with marketing decision-makers</Typography>
-                    <Typography variant="body1" paragraph>✓ Enables strategy refinement based on clear rules</Typography>
-                    <Typography variant="body1" paragraph>✓ Fosters better customer engagement</Typography>
-                    <Typography variant="body1" paragraph>✓ Allows validation of business logic</Typography>
-                  </Paper>
-                  
-                  <Box sx={{ mt: 4 }}>
-                    <div className="visual-metaphor" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <div className="marketer interpretable" style={{ textAlign: 'center', padding: '10px' }}>
-                        <img src="https://img.icons8.com/color/96/000000/happy-cloud.png" alt="Confident marketer" />
-                        <Typography>Clear controls and understanding</Typography>
-                      </div>
-                      <div className="marketer blackbox" style={{ textAlign: 'center', padding: '10px' }}>
-                        <img src="https://img.icons8.com/color/96/000000/confused-cloud.png" alt="Confused marketer" />
-                        <Typography>No visibility into decision process</Typography>
-                      </div>
-                    </div>
-                  </Box>
-                </Grid>
-                
-                <Grid item xs={12} md={7}>
-                  <Typography variant="h6" gutterBottom>Model Comparison Across Key Dimensions</Typography>
-                  <Box sx={{ height: 400 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={modelComparisonData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis label={{ value: 'Score', angle: -90, position: 'insideLeft' }} />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="interpretable" name="Interpretable Models" fill="#5cb85c" />
-                        <Bar dataKey="blackbox" name="Black Box Models" fill="#d9534f" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-          
-          {/* Tab 2: Interactive Rules */}
-          {tabIndex === 1 && (
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom align="center">Interpretable Model vs. Black Box Model</Typography>
+      <Tabs defaultValue="comparison" className="w-full">
+        <TabsList className="flex w-full mb-6 border-b">
+          <TabsTrigger 
+            value="comparison" 
+            className="flex-1 py-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
+          >
+            Model Comparison
+          </TabsTrigger>
+          <TabsTrigger 
+            value="rules" 
+            className="flex-1 py-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
+          >
+            Interactive Rules
+          </TabsTrigger>
+          <TabsTrigger 
+            value="simulator" 
+            className="flex-1 py-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
+          >
+            Decision Simulator
+          </TabsTrigger>
+          <TabsTrigger 
+            value="impact" 
+            className="flex-1 py-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"
+          >
+            Marketing Impact
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Tab 1: Model Comparison */}
+        <TabsContent value="comparison" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="md:col-span-5 space-y-4">
+              <h2 className="text-xl font-semibold">The Interpretability Advantage</h2>
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <p className="py-1">✓ Transparency reveals the 'why' behind predictions</p>
+                <p className="py-1">✓ Builds trust with marketing decision-makers</p>
+                <p className="py-1">✓ Enables strategy refinement based on clear rules</p>
+                <p className="py-1">✓ Fosters better customer engagement</p>
+                <p className="py-1">✓ Allows validation of business logic</p>
+              </div>
               
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={2} sx={{ p: 3, height: '100%', bgcolor: '#f3fff3' }}>
-                    <Typography variant="h6" gutterBottom align="center">Interpretable Model</Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-                      <div className="tree-visualization" style={{ display: 'flex', justifyContent: 'space-around', width: '100%', marginBottom: '20px' }}>
-                        {nodes.map(node => (
-                          <div 
-                            key={node.id}
-                            style={{ 
-                              padding: '10px', 
-                              margin: '10px', 
-                              borderRadius: '5px',
-                              backgroundColor: activeNode === node.id ? '#4CAF50' : '#8bc34a',
-                              color: 'white',
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease'
-                            }}
-                            onClick={() => setActiveNode(activeNode === node.id ? null : node.id)}
-                          >
-                            Node {node.id}
-                          </div>
-                        ))}
-                      </div>
-                      {activeNode && (
-                        <Paper elevation={3} sx={{ p: 2, bgcolor: '#e8f5e9', width: '100%' }}>
-                          <Typography>{nodes.find(n => n.id === activeNode).rule}</Typography>
-                        </Paper>
-                      )}
-                    </Box>
-                    <Box sx={{ mt: 3 }}>
-                      <Typography variant="body1" paragraph>
-                        Click on a node above to see the exact decision rule. These clear rules:
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: 'green', mb: 1 }}>✓ Show exactly how decisions are made</Typography>
-                      <Typography variant="body1" sx={{ color: 'green', mb: 1 }}>✓ Provide actionable marketing insights</Typography>
-                      <Typography variant="body1" sx={{ color: 'green', mb: 1 }}>✓ Allow easy validation by business experts</Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-                
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={2} sx={{ p: 3, height: '100%', bgcolor: '#fff3f3' }}>
-                    <Typography variant="h6" gutterBottom align="center">Black Box Model</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', bgcolor: '#f5f5f5', borderRadius: '5px', mb: 3 }}>
-                      <div className="neural-network" style={{ textAlign: 'center' }}>
-                        <Typography variant="h4" sx={{ color: '#888' }}>???</Typography>
-                        <img 
-                          src="https://miro.medium.com/max/1400/1*iWS1HIm9z0MYyUbbpYBjwg.png" 
-                          alt="Complex Neural Network Structure" 
-                          style={{ maxWidth: '80%', height: 'auto', marginTop: '20px', opacity: '0.7' }} 
-                        />
-                      </div>
-                    </Box>
-                    <Box sx={{ mt: 3 }}>
-                      <Typography variant="body1" paragraph>
-                        Black box models hide their decision-making process:
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: 'red', mb: 1 }}>✗ Impossible to understand why predictions are made</Typography>
-                      <Typography variant="body1" sx={{ color: 'red', mb: 1 }}>✗ Difficult to trust or validate with domain knowledge</Typography>
-                      <Typography variant="body1" sx={{ color: 'red', mb: 1 }}>✗ Cannot easily extract actionable insights</Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
+              <div className="flex justify-between mt-6">
+                <div className="text-center px-4">
+                  <img src="https://img.icons8.com/color/96/000000/happy-cloud.png" alt="Confident marketer" className="mx-auto" />
+                  <p className="mt-2">Clear controls and understanding</p>
+                </div>
+                <div className="text-center px-4">
+                  <img src="https://img.icons8.com/color/96/000000/confused-cloud.png" alt="Confused marketer" className="mx-auto" />
+                  <p className="mt-2">No visibility into decision process</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="md:col-span-7">
+              <h2 className="text-xl font-semibold mb-4">Model Comparison Across Key Dimensions</h2>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={modelComparisonData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="interpretable" name="Interpretable Models" fill="#10b981" />
+                    <Bar dataKey="blackbox" name="#ef4444" fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab 2: Interactive Rules */}
+        <TabsContent value="rules" className="space-y-6">
+          <h2 className="text-xl font-semibold text-center mb-4">Interpretable Model vs. Black Box Model</h2>
           
-          {/* Tab 3: Decision Simulator */}
-          {tabIndex === 2 && (
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>Interactive Marketing Decision Simulator</Typography>
-              <Typography variant="body1" paragraph>
-                Adjust customer parameters to see how an interpretable model guides decision-making:
-              </Typography>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-green-50 p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-center mb-4">Interpretable Model</h3>
               
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={4}>
-                  <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography gutterBottom>Customer Age</Typography>
-                    <Slider
-                      value={age}
-                      onChange={(e, newValue) => {setAge(newValue); setShowResults(false);}}
-                      min={18}
-                      max={65}
-                      valueLabelDisplay="auto"
-                    />
-                    
-                    <Typography gutterBottom sx={{ mt: 2 }}>Income (thousands $)</Typography>
-                    <Slider
-                      value={income}
-                      onChange={(e, newValue) => {setIncome(newValue); setShowResults(false);}}
-                      min={20}
-                      max={150}
-                      valueLabelDisplay="auto"
-                    />
-                    
-                    <Typography gutterBottom sx={{ mt: 2 }}>Distance to Store (miles)</Typography>
-                    <Slider
-                      value={distance}
-                      onChange={(e, newValue) => {setDistance(newValue); setShowResults(false);}}
-                      min={0.1}
-                      max={15}
-                      step={0.1}
-                      valueLabelDisplay="auto"
-                    />
-                    
-                    <Typography gutterBottom sx={{ mt: 2 }}>Time of Day</Typography>
-                    <Select
-                      fullWidth
-                      value={timeOfDay}
-                      onChange={(e) => {setTimeOfDay(e.target.value); setShowResults(false);}}
-                    >
-                      <MenuItem value="Morning">Morning</MenuItem>
-                      <MenuItem value="Afternoon">Afternoon</MenuItem>
-                      <MenuItem value="Evening">Evening</MenuItem>
-                    </Select>
-                    
-                    <Box sx={{ mt: 2 }}>
-                      <FormControlLabel
-                        control={<Checkbox checked={weekend} onChange={(e) => {setWeekend(e.target.checked); setShowResults(false);}} />}
-                        label="Weekend?"
-                      />
-                    </Box>
-                    
-                    <Box>
-                      <FormControlLabel
-                        control={<Checkbox checked={children} onChange={(e) => {setChildren(e.target.checked); setShowResults(false);}} />}
-                        label="Has Children?"
-                      />
-                    </Box>
-                    
-                    <Typography gutterBottom sx={{ mt: 2 }}>Previous Store Visits</Typography>
-                    <Slider
-                      value={previousVisits}
-                      onChange={(e, newValue) => {setPreviousVisits(newValue); setShowResults(false);}}
-                      min={0}
-                      max={10}
-                      step={1}
-                      valueLabelDisplay="auto"
-                    />
-                    
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      fullWidth 
-                      sx={{ mt: 3 }}
-                      onClick={handleGenerateStrategy}
-                    >
-                      Generate Coupon Strategy
-                    </Button>
-                  </Paper>
-                </Grid>
-                
-                <Grid item xs={12} md={8}>
-                  {showResults ? (
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                      <Typography variant="h6" gutterBottom align="center">Marketing Decision Results</Typography>
-                      
-                      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-                        <GaugeChart 
-                          id="gauge-chart"
-                          nrOfLevels={3}
-                          colors={["#FF5F6D", "#FFC371", "#5cb85c"]}
-                          percent={probability}
-                          textColor="#000000"
-                          formatTextValue={value => value + '%'}
-                        />
-                      </Box>
-                      
-                      <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                          <Paper elevation={1} sx={{ p: 2, bgcolor: '#e8f4fd' }}>
-                            <Typography variant="h6">Applied Rule: {rule}</Typography>
-                          </Paper>
-                        </Grid>
-                        
-                        <Grid item xs={12}>
-                          <Paper elevation={1} sx={{ p: 2, bgcolor: '#e8fde8' }}>
-                            <Typography variant="h6">Recommended Strategy: {discount}</Typography>
-                          </Paper>
-                        </Grid>
-                        
-                        <Grid item xs={12}>
-                          <Typography variant="h6" gutterBottom>Rule Explanation:</Typography>
-                          <Typography variant="body1" paragraph>
-                            This recommendation is based on clear, interpretable rules from our model:
-                          </Typography>
-                          <Typography variant="body1" paragraph>
-                            • Customer segment identified: <strong>{rule}</strong>
-                          </Typography>
-                          <Typography variant="body1" paragraph>
-                            • Probability of accepting coupon: <strong>{(probability * 100).toFixed(2)}%</strong>
-                          </Typography>
-                          <Typography variant="body1" paragraph>
-                            • <strong>Why this works:</strong> {explanation}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Paper>
-                  ) : (
-                    <Paper elevation={2} sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                      <Typography variant="h6" sx={{ color: '#888' }}>
-                        Adjust parameters and click "Generate Coupon Strategy" to see results
-                      </Typography>
-                    </Paper>
-                  )}
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-          
-          {/* Tab 4: Marketing Impact */}
-          {tabIndex === 3 && (
-            <Box sx={{ p: 3 }}>
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>Interactive Poll</Typography>
-                    <Typography variant="body1" paragraph>
-                      Which would you trust more for allocating your $1M marketing budget?
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <Button 
-                        variant={pollAnswer === 'blackbox' ? 'contained' : 'outlined'} 
-                        color="primary"
-                        onClick={() => setPollAnswer('blackbox')}
-                        sx={{ p: 2, textAlign: 'left', justifyContent: 'flex-start' }}
-                      >
-                        A highly accurate model you can't explain
-                      </Button>
-                      
-                      <Button 
-                        variant={pollAnswer === 'interpretable' ? 'contained' : 'outlined'} 
-                        color="primary"
-                        onClick={() => setPollAnswer('interpretable')}
-                        sx={{ p: 2, textAlign: 'left', justifyContent: 'flex-start' }}
-                      >
-                        A slightly less accurate model with clear reasoning you can verify
-                      </Button>
-                    </Box>
-                    
-                    {pollAnswer && (
-                      <Box sx={{ mt: 3, p: 2, bgcolor: '#f3f3f3', borderRadius: 2 }}>
-                        <Typography variant="body1">
-                          {pollAnswer === 'blackbox' ? 
-                            "While accuracy is important, black box models may hide biases or errors that could lead to costly mistakes in your marketing campaigns." : 
-                            "Great choice! The small accuracy trade-off is usually worth the added transparency, trust, and ability to validate decisions with domain expertise."}
-                        </Typography>
-                      </Box>
+              <div className="flex justify-around mb-4">
+                {nodes.map(node => (
+                  <button 
+                    key={node.id}
+                    className={cn(
+                      "py-2 px-4 rounded-md text-white transition-all",
+                      activeNode === node.id ? "bg-green-600" : "bg-green-400 hover:bg-green-500"
                     )}
-                  </Paper>
-                </Grid>
+                    onClick={() => setActiveNode(activeNode === node.id ? null : node.id)}
+                  >
+                    Node {node.id}
+                  </button>
+                ))}
+              </div>
+              
+              {activeNode && (
+                <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded-r-md mb-4">
+                  <p>{nodes.find(n => n.id === activeNode).rule}</p>
+                </div>
+              )}
+              
+              <div className="mt-4 space-y-2">
+                <p>Click on a node above to see the exact decision rule. These clear rules:</p>
+                <p className="text-green-700">✓ Show exactly how decisions are made</p>
+                <p className="text-green-700">✓ Provide actionable marketing insights</p>
+                <p className="text-green-700">✓ Allow easy validation by business experts</p>
+              </div>
+            </div>
+            
+            <div className="bg-red-50 p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-center mb-4">Black Box Model</h3>
+              
+              <div className="flex justify-center items-center h-48 bg-gray-100 rounded-md mb-4">
+                <div className="text-center">
+                  <p className="text-4xl text-gray-400 mb-2">???</p>
+                  <img 
+                    src="https://miro.medium.com/max/1400/1*iWS1HIm9z0MYyUbbpYBjwg.png" 
+                    alt="Complex Neural Network" 
+                    className="max-w-[80%] h-auto mx-auto opacity-70" 
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-4 space-y-2">
+                <p>Black box models hide their decision-making process:</p>
+                <p className="text-red-700">✗ Impossible to understand why predictions are made</p>
+                <p className="text-red-700">✗ Difficult to trust or validate with domain knowledge</p>
+                <p className="text-red-700">✗ Cannot easily extract actionable insights</p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab 3: Decision Simulator */}
+        <TabsContent value="simulator" className="space-y-6">
+          <h2 className="text-xl font-semibold mb-2">Interactive Marketing Decision Simulator</h2>
+          <p className="mb-6">Adjust customer parameters to see how an interpretable model guides decision-making:</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="md:col-span-4">
+              <div className="bg-white p-6 rounded-lg shadow">
+                <Slider 
+                  label="Customer Age" 
+                  value={age} 
+                  onChange={(newValue) => {setAge(newValue); setShowResults(false);}} 
+                  min={18} 
+                  max={65} 
+                />
                 
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>Real-World Impact</Typography>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                      <Box sx={{ width: 100, height: 100, bgcolor: '#f5f5f5', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', mr: 3 }}>
-                        <Typography variant="h4">RG</Typography>
-                      </Box>
-                      
-                      <Box>
-                        <Typography variant="h6" gutterBottom>RetailGiant Success Story</Typography>
-                        <Typography variant="body1">
-                          <strong>Increased conversion rates by 28%</strong> after switching to interpretable models for their coupon targeting system. Marketing managers could directly align business goals with model rules, leading to more effective campaigns and higher ROI.
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Box sx={{ mt: 4 }}>
-                      <Typography variant="h6" gutterBottom>Key Benefits Realized</Typography>
-                      <div className="key-points" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
-                        <Paper elevation={1} sx={{ p: 2 }}>
-                          <Typography variant="subtitle1" gutterBottom>Trust & Transparency</Typography>
-                          <Typography variant="body2">See the 'why' behind every marketing prediction</Typography>
-                        </Paper>
-                        
-                        <Paper elevation={1} sx={{ p: 2 }}>
-                          <Typography variant="subtitle1" gutterBottom>Actionable Insights</Typography>
-                          <Typography variant="body2">Convert rules directly into targeted campaign strategies</Typography>
-                        </Paper>
-                        
-                        <Paper elevation={1} sx={{ p: 2 }}>
-                          <Typography variant="subtitle1" gutterBottom>Strategic Refinement</Typography>
-                          <Typography variant="body2">Easily validate and improve your approach using clear IF-THEN logic</Typography>
-                        </Paper>
-                        
-                        <Paper elevation={1} sx={{ p: 2 }}>
-                          <Typography variant="subtitle1" gutterBottom>Business Value</Typography>
-                          <Typography variant="body2">Balance accuracy with understanding for sustainable marketing success</Typography>
-                        </Paper>
+                <Slider 
+                  label="Income (thousands $)" 
+                  value={income} 
+                  onChange={(newValue) => {setIncome(newValue); setShowResults(false);}} 
+                  min={20} 
+                  max={150} 
+                />
+                
+                <Slider 
+                  label="Distance to Store (miles)" 
+                  value={distance} 
+                  onChange={(newValue) => {setDistance(newValue); setShowResults(false);}} 
+                  min={0.1} 
+                  max={15} 
+                  step={0.1} 
+                />
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time of Day</label>
+                  <select 
+                    value={timeOfDay} 
+                    onChange={(e) => {setTimeOfDay(e.target.value); setShowResults(false);}}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="Morning">Morning</option>
+                    <option value="Afternoon">Afternoon</option>
+                    <option value="Evening">Evening</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center mb-4">
+                  <input 
+                    type="checkbox" 
+                    id="weekend" 
+                    checked={weekend} 
+                    onChange={(e) => {setWeekend(e.target.checked); setShowResults(false);}}
+                    className="h-4 w-4 text-blue-600 rounded" 
+                  />
+                  <label htmlFor="weekend" className="ml-2 text-sm text-gray-700">Weekend?</label>
+                </div>
+                
+                <div className="flex items-center mb-4">
+                  <input 
+                    type="checkbox" 
+                    id="hasChildren" 
+                    checked={hasChildren} 
+                    onChange={(e) => {setHasChildren(e.target.checked); setShowResults(false);}}
+                    className="h-4 w-4 text-blue-600 rounded" 
+                  />
+                  <label htmlFor="hasChildren" className="ml-2 text-sm text-gray-700">Has Children?</label>
+                </div>
+                
+                <Slider 
+                  label="Previous Store Visits" 
+                  value={previousVisits} 
+                  onChange={(newValue) => {setPreviousVisits(newValue); setShowResults(false);}} 
+                  min={0} 
+                  max={10} 
+                />
+                
+                <button 
+                  onClick={handleGenerateStrategy}
+                  className="w-full py-2 px-4 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow"
+                >
+                  Generate Coupon Strategy
+                </button>
+              </div>
+            </div>
+            
+            <div className="md:col-span-8">
+              {showResults ? (
+                <div className="bg-white p-6 rounded-lg shadow">
+                  <h3 className="text-lg font-semibold text-center mb-4">Marketing Decision Results</h3>
+                  
+                  <div className="flex justify-center mb-6">
+                    <div className="w-48 h-48 relative">
+                      <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold">
+                        {Math.round(probability * 100)}%
                       </div>
-                    </Box>
-                  </Paper>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-        </Paper>
-        
-        {/* Final Call to Action */}
-        <Paper elevation={3} sx={{ p: 3, bgcolor: '#e8f4fd' }}>
-          <Typography variant="h5" gutterBottom align="center">Balancing Accuracy and Interpretability</Typography>
-          <Typography variant="body1" paragraph align="center">
-            Our research framework combines reliable predictions with simple, clear decision rules. This dual benefit means businesses get accurate forecasts alongside insights that are easy to understand and act on, leading to more effective and data-driven marketing strategies.
-          </Typography>
-        </Paper>
-      </Box>
+                      <svg viewBox="0 0 100 100" className="transform -rotate-90 w-full h-full">
+                        <circle 
+                          cx="50" cy="50" r="45" 
+                          fill="none" stroke="#f3f4f6" strokeWidth="10" 
+                        />
+                        <circle 
+                          cx="50" cy="50" r="45" 
+                          fill="none" stroke={probability > 0.7 ? "#10b981" : probability > 0.4 ? "#f59e0b" : "#ef4444"}
+                          strokeWidth="10" 
+                          strokeDasharray={`${probability * 283} 283`} 
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-50 p-3 rounded-md mb-4">
+                    <h4 className="font-semibold">Applied Rule: {rule}</h4>
+                  </div>
+                  
+                  <div className="bg-green-50 p-3 rounded-md mb-4">
+                    <h4 className="font-semibold">Recommended Strategy: {discount}</h4>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <h4 className="font-semibold mb-2">Rule Explanation:</h4>
+                    <p className="mb-2">This recommendation is based on clear, interpretable rules from our model:</p>
+                    <p className="mb-2">• Customer segment identified: <span className="font-semibold">{rule}</span></p>
+                    <p className="mb-2">• Probability of accepting coupon: <span className="font-semibold">{(probability * 100).toFixed(2)}%</span></p>
+                    <p className="mb-2">• <span className="font-semibold">Why this works:</span> {explanation}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white p-6 rounded-lg shadow flex justify-center items-center h-full">
+                  <p className="text-lg text-gray-500">
+                    Adjust parameters and click "Generate Coupon Strategy" to see results
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab 4: Marketing Impact */}
+        <TabsContent value="impact" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-4">Interactive Poll</h3>
+              <p className="mb-4">Which would you trust more for allocating your $1M marketing budget?</p>
+              
+              <div className="space-y-4">
+                <button 
+                  onClick={() => setPollAnswer('blackbox')}
+                  className={cn(
+                    "w-full p-4 text-left rounded-md border transition-colors",
+                    pollAnswer === 'blackbox' 
+                      ? "bg-blue-600 text-white border-blue-600" 
+                      : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
+                  )}
+                >
+                  A highly accurate model you can't explain
+                </button>
+                
+                <button 
+                  onClick={() => setPollAnswer('interpretable')}
+                  className={cn(
+                    "w-full p-4 text-left rounded-md border transition-colors",
+                    pollAnswer === 'interpretable' 
+                      ? "bg-blue-600 text-white border-blue-600" 
+                      : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
+                  )}
+                >
+                  A slightly less accurate model with clear reasoning you can verify
+                </button>
+              </div>
+              
+              {pollAnswer && (
+                <div className="mt-6 p-4 bg-gray-100 rounded-md">
+                  <p>
+                    {pollAnswer === 'blackbox' 
+                      ? "While accuracy is important, black box models may hide biases or errors that could lead to costly mistakes in your marketing campaigns." 
+                      : "Great choice! The small accuracy trade-off is usually worth the added transparency, trust, and ability to validate decisions with domain expertise."}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-4">Real-World Impact</h3>
+              
+              <div className="flex items-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold mr-4">
+                  RG
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">RetailGiant Success Story</h4>
+                  <p>
+                    <span className="font-semibold">Increased conversion rates by 28%</span> after switching to interpretable models for their coupon targeting system. Marketing managers could directly align business goals with model rules.
+                  </p>
+                </div>
+              </div>
+              
+              <h4 className="font-semibold mb-4">Key Benefits Realized</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-50 rounded-md">
+                  <h5 className="font-medium mb-1">Trust & Transparency</h5>
+                  <p className="text-sm">See the 'why' behind every marketing prediction</p>
+                </div>
+                
+                <div className="p-3 bg-gray-50 rounded-md">
+                  <h5 className="font-medium mb-1">Actionable Insights</h5>
+                  <p className="text-sm">Convert rules directly into targeted campaign strategies</p>
+                </div>
+                
+                <div className="p-3 bg-gray-50 rounded-md">
+                  <h5 className="font-medium mb-1">Strategic Refinement</h5>
+                  <p className="text-sm">Easily validate and improve your approach using clear IF-THEN logic</p>
+                </div>
+                
+                <div className="p-3 bg-gray-50 rounded-md">
+                  <h5 className="font-medium mb-1">Business Value</h5>
+                  <p className="text-sm">Balance accuracy with understanding for sustainable marketing success</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Final Call to Action */}
+      <div className="mt-8 p-6 bg-blue-50 rounded-lg shadow">
+        <h2 className="text-xl font-semibold text-center mb-4">Balancing Accuracy and Interpretability</h2>
+        <p className="text-center">
+          Our research framework combines reliable predictions with simple, clear decision rules. This dual benefit means businesses get accurate forecasts alongside insights that are easy to understand and act on, leading to more effective and data-driven marketing strategies.
+        </p>
+      </div>
     </div>
   );
 }
 
-export default App;
+export default InterpretableModelsSlide;
