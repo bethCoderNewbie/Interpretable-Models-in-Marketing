@@ -1,0 +1,114 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f5f5;
+}
+
+.App {
+  text-align: left;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.tree-visualization {
+  margin: 20px 0;
+}
+
+.tree-node {
+  padding: 15px;
+  margin: 10px;
+  background-color: #8bc34a;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tree-node.active {
+  background-color: #4CAF50;
+}
+
+.rule-popup {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e8f5e9;
+  border-radius: 5px;
+  border-left: 5px solid #4CAF50;
+}
+
+.neural-network {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.question-marks {
+  font-size: 48px;
+  color: #888;
+}
+
+.visual-metaphor {
+  display: flex;
+  justify-content: space-around;
+  margin: 30px 0;
+}
+
+.marketer {
+  text-align: center;
+  padding: 15px;
+}
+
+.key-points {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.poll-button {
+  padding: 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.poll-button.selected {
+  background-color: #2196F3;
+  color: white;
+}
+
+.case-study {
+  margin: 30px 0;
+}
+
+.case-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.company-logo {
+  width: 100px;
+  height: 100px;
+  background-color: #f5f5f5;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+}
